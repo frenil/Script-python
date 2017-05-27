@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import urllib.request
 import xml.etree.ElementTree as ET
-import operator
 from xml.dom.minidom import *
 class station:
     name= 'default name'
@@ -15,13 +14,6 @@ class station:
         self.name = temp.Getname()
         self.num = temp.Getnum()
         self.code = temp.Getcode()
-
-    def Setname(self,name):
-        self.name = name
-    def Setnum(self,num):
-        self.num = num
-    def Setcode(self,code):
-        self.code = code
     def Getname(self):
         return self.name
     def Getnum(self):
@@ -43,22 +35,45 @@ def CreatRootList(num):
     for item in elemet:
         Lname = item.find("STATION_NM")
         Lnum = item.find("LINE_NUM")
-        Lcode = item.find("FR_CODE")
+        Lcode = item.find("STATION_CD")
         list.append(station(Lname.text,Lnum.text, Lcode.text))
+    return list
+def SearchStation(name,list):
+    tempstation = station(0, 0, 0)
+    for d in list:
+        for i in d:
+            if i.Getname() == name:
+                tempstation.copy(i)
+                break
+    return tempstation
+
+def SearchFacility(name,Rlist):
+    list = []
+    url = "http://openAPI.seoul.go.kr:8088/4d4d49575973696c3131305472464d63/xml/SearchFacilityByIDService/1/5/"
+    station = SearchStation(name,Rlist)
+    inputnum = str(station.Getcode())
+    if inputnum =='0':
+        list.append("존재하지 않는 역입니다.")
+        return list
+
+    facility = urllib.request.urlopen(url+inputnum).read()
+    facility = facility.decode('utf-8')
+
+    facility = ET.fromstring(str(facility))
+    elemet = facility.getiterator("row")
+
+    for item in elemet:
+        Lname = item.find("AREA_NM")
+        list.append(Lname.text)
     return list
 
 
-list = []
+
+Rootlist = []
 for i in range(4):
     temp = CreatRootList(i + 1)
-    list.append(temp)
-searchname = "소요산"
-tempstation = station(0,0,0)
-for d in list:
-    for i in d:
+    Rootlist.append(temp)
 
-        if i.Getname() in searchname:
-            tempstation.copy(i)
-            print("OK")
-            break
-print(tempstation.Getcode())
+facility = SearchFacility('동두천',Rootlist)
+for i in facility:
+    print(i)
