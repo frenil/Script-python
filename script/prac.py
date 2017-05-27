@@ -47,6 +47,25 @@ def SearchStation(name,list):
                 break
     return tempstation
 
+def SearchNear(name,list):
+    leftstation = station(0, 0, 0)
+    rightstation = station(0,0,0)
+    isFind = False
+    for d in list:
+        if isFind:
+            break
+        for i in d:
+            if isFind:
+                rightstation.copy(i)
+                break
+
+            if i.Getname() == name:
+                isFind = True
+            else:
+                leftstation.copy(i)
+
+    return leftstation, rightstation
+
 def SearchFacility(name,Rlist):
     list = []
     url = "http://openAPI.seoul.go.kr:8088/4d4d49575973696c3131305472464d63/xml/SearchFacilityByIDService/1/5/"
@@ -67,7 +86,12 @@ def SearchFacility(name,Rlist):
         list.append(Lname.text)
     return list
 
-
+def PrintStation(name,facility, left,right):
+    print(name+"역의 주요시설은")
+    for i in facility:
+        print(i)
+    print("가 있습니다.")
+    print("이전역은 "+left.Getname()+" 이고 다음역은 "+ right.Getname()+"입니다.")
 
 Rootlist = []
 for i in range(4):
@@ -75,5 +99,6 @@ for i in range(4):
     Rootlist.append(temp)
 
 facility = SearchFacility('동두천',Rootlist)
-for i in facility:
-    print(i)
+left,right = SearchNear('동두천',Rootlist)
+
+PrintStation('동두천',facility,left,right)
