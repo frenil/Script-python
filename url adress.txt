@@ -1,0 +1,6 @@
+http://openapi.seoul.go.kr:8088/646e4e417173696c37327874667077/xml/SearchSTNBySubwayLineService/1/999
+노선
+
+http://openAPI.seoul.go.kr:8088/4d4d49575973696c3131305472464d63/xml/SearchFacilityByIDService/1/5/
+지하철 주변시설 정보
+
