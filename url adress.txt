@@ -4,3 +4,7 @@ http://openapi.seoul.go.kr:8088/646e4e417173696c37327874667077/xml/SearchSTNBySu
 http://openAPI.seoul.go.kr:8088/4d4d49575973696c3131305472464d63/xml/SearchFacilityByIDService/1/5/
 지하철 주변시설 정보
 
+http://swopenAPI.seoul.go.kr/api/subway/sample/xml/shortestRoute/1/5/
+지하철 경로
+
+

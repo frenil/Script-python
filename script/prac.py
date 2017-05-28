@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 import urllib.request
+from urllib.parse import quote
 import xml.etree.ElementTree as ET
 from xml.dom.minidom import *
+
+
 class station:
     name= 'default name'
     num = -1
@@ -20,8 +23,81 @@ class station:
         return self.num
     def Getcode(self):
         return self.code
+class Rout:
+    start = None
+    destination = None
+    def __init__(self,start,des):
+        self.start = start
+        self.destination = des
+
+def SearchRout(start,destination):
+    list = []
+    url = "http://swopenapi.seoul.go.kr/api/subway/455a6e764b73696c333959786a754d/xml/shortestRoute/0/5/"
+
+    temp = url +start +'/'+ destination
+    rout = urllib.request.urlopen(temp).read()
+    rout = rout.decode('utf-8')
+
+    rout = ET.fromstring(str(rout))
+    success = rout.getiterator("RESULT")
+    isSuccess = None
+    for i in success:
+        isSuccess =i.find("code")
+
+    if isSuccess.text == 'INFO-000':
+        IDlist = None
+        Namelist = None
+
+        elemet = rout.getiterator("row")
+
+        for i in elemet:
+            IDlist = i.find("shtStatnId")
+            Namelist = i.find("shtStatnNm")
+            IDlist = IDlist.text.split(",")
+            Namelist = Namelist.text.split(",")
+            break
+        beforeID = IDlist[0]
+        changeName = []
+        for i in range(0, len(IDlist)):
+            if IDlist[i] != beforeID:
+                ID = int(IDlist[i])//1000000
+                print(IDlist[i]+"   "+ beforeID)
+                if ID<1010:
+                    LineNum = str(ID-1000)+"호선"
+                elif ID == 1061:
+                    LineNum = "경의중앙선"
+                elif ID == 1063:
+                    LineNum = "중앙선"
+                elif ID == 1065:
+                    LineNum = "공항선"
+                elif ID == 1067:
+                    LineNum = "경춘선"
+                elif ID == 1069:
+                    LineNum = "인천1호선"
+                elif ID == 1071:
+                    LineNum = "수인선"
+                elif ID == 1075:
+                    LineNum = "분당선"
+                elif ID == 1077:
+                    LineNum = "신분당선"
+                elif ID == 1078:
+                    LineNum = "인천2호선"
+                elif ID == 1079:
+                    LineNum = "의정부경전철"
+                elif ID == 1080:
+                    LineNum = "용인경전철"
+                else:
+                    return False
+                changeName.append((Namelist[i],LineNum))
+            beforeID = IDlist[i]
+        return changeName
+    elif isSuccess.text == 'INFO-200':
+        return False
+
+    return list
 
 def CreatRootList(num):
+    list = []
 
     Rooturl = "http://openapi.seoul.go.kr:8088/646e4e417173696c37327874667077/xml/SearchSTNBySubwayLineService/1/999/"
     cnum = str(num)
@@ -29,7 +105,6 @@ def CreatRootList(num):
     line = urllib.request.urlopen(temp).read()
     line = line.decode('utf-8')
     line = ET.fromstring(str(line))
-    list = []
     elemet = line.getiterator("row")
 
     for item in elemet:
@@ -46,7 +121,6 @@ def SearchStation(name,list):
                 tempstation.copy(i)
                 break
     return tempstation
-
 def SearchNear(name,list):
     leftstation = station(0, 0, 0)
     rightstation = station(0,0,0)
@@ -65,15 +139,17 @@ def SearchNear(name,list):
                 leftstation.copy(i)
 
     return leftstation, rightstation
-
 def SearchFacility(name,Rlist):
     list = []
     url = "http://openAPI.seoul.go.kr:8088/4d4d49575973696c3131305472464d63/xml/SearchFacilityByIDService/1/5/"
+
     station = SearchStation(name,Rlist)
     inputnum = str(station.Getcode())
+
     if inputnum =='0':
-        list.append("존재하지 않는 역입니다.")
-        return list
+        print("존재하지 않습니다.")
+        list.append(0)
+        return 0
 
     facility = urllib.request.urlopen(url+inputnum).read()
     facility = facility.decode('utf-8')
@@ -85,20 +161,48 @@ def SearchFacility(name,Rlist):
         Lname = item.find("AREA_NM")
         list.append(Lname.text)
     return list
-
 def PrintStation(name,facility, left,right):
     print(name+"역의 주요시설은")
     for i in facility:
         print(i)
     print("가 있습니다.")
-    print("이전역은 "+left.Getname()+" 이고 다음역은 "+ right.Getname()+"입니다.")
+    if left.Getname()!=0:
+        print("이전역은 "+left.Getname()+"입니다.")
+    if right.Getname()!=0:
+        print("다음역은 "+ right.Getname()+"입니다.")
 
-Rootlist = []
-for i in range(4):
-    temp = CreatRootList(i + 1)
-    Rootlist.append(temp)
 
-facility = SearchFacility('동두천',Rootlist)
-left,right = SearchNear('동두천',Rootlist)
+isEnd = False
+def main():
+    Rootlist = []
+    for i in range(4):
+        temp = CreatRootList(i + 1)
+        Rootlist.append(temp)
 
-PrintStation('동두천',facility,left,right)
+    while isEnd !=True:
+        searchtype = input("무엇을 하시겠습니까? (1:경로검색, 2:지하철역 정보, q:프로그램 종료): ")
+        if searchtype == '1':
+            start = input("출발 역을 입력하십시오: ")
+            destination = input("도착 역을 입력하십시오: ")
+            result = SearchRout(start,destination)
+            if result==False:
+                print("잘못된 입력입니다.")
+            else:
+                for i in result:
+                    print(i)
+
+        elif searchtype =='2':
+            findname = input("검색할 역을 입력하시오: ")
+
+            facility = SearchFacility(str(findname),Rootlist)
+            if facility != 0 :
+                left,right = SearchNear(findname,Rootlist)
+                PrintStation(findname,facility,left,right)
+        elif searchtype == 'q':
+            print("이용해주셔서 감사합니다.")
+            break
+        else:
+            print("잘못된 명령어입니다.")
+
+
+main()
