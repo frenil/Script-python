@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import urllib.request
+import urllib.parse
 from urllib.parse import quote
 import xml.etree.ElementTree as ET
 from xml.dom.minidom import *
@@ -33,12 +34,15 @@ class Rout:
 def SearchRout(start,destination):
     list = []
     url = "http://swopenapi.seoul.go.kr/api/subway/455a6e764b73696c333959786a754d/xml/shortestRoute/0/5/"
+    url2 = urllib.parse.quote_plus(start)
+    url3 = urllib.parse.quote_plus(destination)
+    temp = url +url2 +'/'+ url3
 
-    temp = url +start +'/'+ destination
     rout = urllib.request.urlopen(temp).read()
     rout = rout.decode('utf-8')
 
     rout = ET.fromstring(str(rout))
+
     success = rout.getiterator("RESULT")
     isSuccess = None
     for i in success:
@@ -56,12 +60,16 @@ def SearchRout(start,destination):
             IDlist = IDlist.text.split(",")
             Namelist = Namelist.text.split(",")
             break
-        beforeID = IDlist[0]
+        for i in range(len(Namelist)):
+            Namelist[i] = Namelist[i].replace(" ","")
+        IDlist.pop()
+        beforeID = int(IDlist[0])//1000000
         changeName = []
         for i in range(0, len(IDlist)):
-            if IDlist[i] != beforeID:
-                ID = int(IDlist[i])//1000000
-                print(IDlist[i]+"   "+ beforeID)
+
+            ID = int(IDlist[i]) // 1000000
+            if ID != beforeID:
+                print("환승")
                 if ID<1010:
                     LineNum = str(ID-1000)+"호선"
                 elif ID == 1061:
@@ -89,7 +97,7 @@ def SearchRout(start,destination):
                 else:
                     return False
                 changeName.append((Namelist[i],LineNum))
-            beforeID = IDlist[i]
+            beforeID = ID
         return changeName
     elif isSuccess.text == 'INFO-200':
         return False
@@ -102,6 +110,7 @@ def CreatRootList(num):
     Rooturl = "http://openapi.seoul.go.kr:8088/646e4e417173696c37327874667077/xml/SearchSTNBySubwayLineService/1/999/"
     cnum = str(num)
     temp = Rooturl+cnum
+
     line = urllib.request.urlopen(temp).read()
     line = line.decode('utf-8')
     line = ET.fromstring(str(line))
@@ -175,7 +184,7 @@ def PrintStation(name,facility, left,right):
 isEnd = False
 def main():
     Rootlist = []
-    for i in range(4):
+    for i in range(9):
         temp = CreatRootList(i + 1)
         Rootlist.append(temp)
 
@@ -188,8 +197,7 @@ def main():
             if result==False:
                 print("잘못된 입력입니다.")
             else:
-                for i in result:
-                    print(i)
+                print(start+"역에서 출발 ",result, "환승  "+destination+"역에 도착")
 
         elif searchtype =='2':
             findname = input("검색할 역을 입력하시오: ")
