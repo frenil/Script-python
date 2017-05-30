@@ -179,14 +179,39 @@ def PrintStation(name,facility, left,right):
         print("이전역은 "+left.Getname()+"입니다.")
     if right.Getname()!=0:
         print("다음역은 "+ right.Getname()+"입니다.")
-
-
-isEnd = False
-def main():
+def insertLine():
     Rootlist = []
+
     for i in range(9):
         temp = CreatRootList(i + 1)
         Rootlist.append(temp)
+    temp = CreatRootList("A")
+    Rootlist.append(temp)
+    temp = CreatRootList("B")
+    Rootlist.append(temp)
+    temp = CreatRootList("E")
+    Rootlist.append(temp)
+    temp = CreatRootList("G")
+    Rootlist.append(temp)
+    temp = CreatRootList("I")
+    Rootlist.append(temp)
+    temp = CreatRootList("I2")
+    Rootlist.append(temp)
+    temp = CreatRootList("K")
+    Rootlist.append(temp)
+    temp = CreatRootList("KK")
+    Rootlist.append(temp)
+    temp = CreatRootList("S")
+    Rootlist.append(temp)
+    temp = CreatRootList("SU")
+    Rootlist.append(temp)
+    temp = CreatRootList("U")
+    Rootlist.append(temp)
+    return Rootlist
+
+isEnd = False
+def main():
+    Rootlist = insertLine()
 
     while isEnd !=True:
         searchtype = input("무엇을 하시겠습니까? (1:경로검색, 2:지하철역 정보, q:프로그램 종료): ")
