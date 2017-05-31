@@ -69,7 +69,6 @@ def SearchRout(start,destination):
 
             ID = int(IDlist[i]) // 1000000
             if ID != beforeID:
-                print("환승")
                 if ID<1010:
                     LineNum = str(ID-1000)+"호선"
                 elif ID == 1061:
