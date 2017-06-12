@@ -55,6 +55,8 @@ def Realtime():
         RenderText.insert(INSERT, "\n")
     if up==None and down==None:
         RenderText.insert(INSERT, "입력값이 잘못되거나 정보가 없을 수 있습니다.")
+        RenderText.insert(INSERT, "\n")
+        RenderText.insert(INSERT, "다음 열차가 10분 이상 남있을 경우 데이터가 없을 수 있습니다")
 
 def Getbutton():
     TempFont = font.Font(window, size=15, weight='bold', family='Consolas')
@@ -91,7 +93,10 @@ def drawInit():
 
     find = Label(window, font=TempFont, text="역검색")
     find.place(x = 280,y=110)
-
+    ps = Label(window, font=TempFont, text="1~9호선 까지검색가능")
+    ps.place(x = 280,y= 140)
+    ps2 = Label(window, font=TempFont, text="URL문제로 2호선 검색 불가")
+    ps2.place(x=280, y=170)
     real = Label(window, font=TempFont, text="역검색")
     real.place(x=550, y=110)
 
@@ -148,7 +153,7 @@ def main():
     GetEntry()
     button1 = Getbutton()
     Rootlist = ReadAPI.insertLine()
-
+    print(Rootlist)
     window.mainloop()
 
 main()
